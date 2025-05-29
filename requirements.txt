@@ -1,0 +1,9 @@
+pandas
+gradio
+openai
+langchain
+langchain-community
+langchain-experimental
+langchain-openai
+tabulate
+flask

@@ -6,6 +6,8 @@ from langchain.memory import ConversationBufferMemory
 from langchain_google_genai import ChatGoogleGenerativeAI  # ✅ Gemini wrapper
 from dotenv import load_dotenv
 import google.generativeai as genai
+from langchain_community.llms.ollama import Ollama
+
 
 
 # --- Load environment variables ---
@@ -15,25 +17,30 @@ load_dotenv()
 df = pd.read_csv("data/Salaries.csv", low_memory=False)
 memory = ConversationBufferMemory(memory_key="chat_history")
 
-# --- Set up Gemini LLM ---
-llm = ChatGoogleGenerativeAI(
-    model="models/gemini-1.5-flash",
-    temperature=0.2,
-    google_api_key=os.getenv("GOOGLE_API_KEY")
-)
+# --- Gemini LLM ---
+# llm = ChatGoogleGenerativeAI(
+#     model="models/gemini-1.5-flash",
+#     temperature=0.2,
+#     google_api_key=os.getenv("GOOGLE_API_KEY")
+# )
 
-# --- Create LangChain agent ---
+llm = Ollama(model="mistral", temperature=0.2)
+
+
+# --- Create LangChain agent - This works with any llm that supports langchain ---
 agent = create_pandas_dataframe_agent(
     llm,
     df,
     verbose=True,
     allow_dangerous_code=True,
+    handle_parsing_errors=True,
     prefix=(
         "You are an expert HR data analyst. You help answer budget-related questions "
         "using a dataset of employee salaries from 2011–2014. Think step-by-step and "
         "always show calculations or reasoning before giving your final answer. "
         "Use the TotalPay column for salary analysis. Do not use TotalPayBenefits unless asked about benefits. Watch for missing or inflated values."
     )
+
 )
 
 # --- Create Flask app ---
